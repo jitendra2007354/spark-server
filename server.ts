@@ -158,10 +158,9 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    // Pure API Backend Mode - No longer serving frontend files
+    app.get("/", (req, res) => {
+      res.json({ status: "Spark API Backend is running securely! 🚀" });
     });
   }
 
