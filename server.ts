@@ -15,7 +15,7 @@ app.use(cors()); // Allows your GitHub Pages site to communicate with this serve
 app.use(express.json());
 
 // Database Connection Pool
-const dbUrl = process.env.DATABASE_URL || "mysql://root:password@localhost:3306/spark_db";
+const dbUrl = process.env.DATABASE_URL || "mysql://root:password@localhost:3306/sparkey_db";
 const parsedUrl = new URL(dbUrl);
 
 const isTiDB = parsedUrl.hostname.includes('tidbcloud.com');
@@ -58,8 +58,8 @@ async function initializeDatabase() {
     
     await pool.execute(`
       INSERT INTO credentials (key_name, key_value) 
-      VALUES ('provisioning_key', 'spark2026')
-      ON DUPLICATE KEY UPDATE key_value = 'spark2026'
+      VALUES ('provisioning_key', 'sparkey2026')
+      ON DUPLICATE KEY UPDATE key_value = 'sparkey2026'
     `);
     
     console.log("[DB SETUP] All database tables are ready! ✅");
@@ -80,13 +80,13 @@ app.post("/api/verify-password", async (req, res) => {
       res.json({ success: true });
     } else {
       // Fallback for demo if no DB matches or if DB is empty
-      if (password === "spark2026") return res.json({ success: true });
+      if (password === "sparkey2026") return res.json({ success: true });
       res.status(401).json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
     console.error("Auth DB Error:", error);
     // Hardcoded fallback for environment without DB
-    if (password === "spark2026") return res.json({ success: true });
+    if (password === "sparkey2026") return res.json({ success: true });
     res.status(500).json({ success: false, message: "Database authentication failed" });
   }
 });
@@ -160,7 +160,7 @@ async function startServer() {
   } else {
     // Pure API Backend Mode - No longer serving frontend files
     app.get("/", (req, res) => {
-      res.json({ status: "Spark API Backend is running securely! 🚀" });
+      res.json({ status: "sparkey API Backend is running securely! 🚀" });
     });
   }
 
