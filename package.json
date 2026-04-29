@@ -9,13 +9,17 @@
   "build": "echo 'No build step needed for API'"
     },
 
+ 
   "dependencies": {
     "@google/genai": "^1.50.1",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "cors": "^2.8.5",
+    "data-uri-to-buffer": "^8.0.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "fetch-blob": "^4.0.0",
+    "formdata-polyfill": "^4.0.10",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "mysql2": "^3.22.2",
