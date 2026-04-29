@@ -5,6 +5,7 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import cors from "cors";
 import { GoogleGenAI } from "@google/genai";
+import fetch from 'node-fetch';
 
 dotenv.config();
 
@@ -111,6 +112,46 @@ app.post("/api/save-form", async (req, res) => {
 app.post("/api/chat", async (req, res) => {
   const { messages, systemInstruction } = req.body;
   
+  // Try GitHub Models (Copilot) first - FREE with high limits
+  const githubToken = process.env.GITHUB_TOKEN;
+  
+  if (githubToken) {
+    try {
+      const formattedMessages = messages.map((m: any) => ({
+        role: m.role,
+        content: m.parts?.[0]?.text || m.content || ""
+      }));
+      
+      const response = await fetch('https://models.github.ai/inference', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${githubToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemInstruction },
+            ...formattedMessages
+          ],
+          temperature: 0.7,
+          max_tokens: 2048
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.choices?.[0]?.message?.content) {
+          return res.json({ text: data.choices[0].message.content });
+        }
+      }
+    } catch (err) {
+      console.log("GitHub Models failed, trying Gemini...", err.message);
+    }
+  }
+  
+  // Fallback to Gemini
   try {
     const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
