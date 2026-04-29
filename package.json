@@ -4,12 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "tsx server.ts",
-  "start": "tsx server.ts",
-  "build": "echo 'No build step needed for API'"
-    },
-
- 
+    "dev": "tsx server.ts",
+    "start": "tsx server.ts",
+    "build": "echo 'No build step needed for API'"
+  },
   "dependencies": {
     "@google/genai": "^1.50.1",
     "@tailwindcss/vite": "^4.1.14",
@@ -24,6 +22,7 @@
     "motion": "^12.23.24",
     "mysql2": "^3.22.2",
     "node-fetch": "^3.3.2",
+    "object-assign": "^4.1.1",
     "p-retry": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
