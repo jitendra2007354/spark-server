@@ -4,8 +4,6 @@ import path from "path";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import cors from "cors";
-import { GoogleGenAI } from "@google/genai";
-import fetch from 'node-fetch';
 
 dotenv.config();
 
@@ -103,90 +101,7 @@ app.post("/api/save-form", async (req, res) => {
     res.json({ success: true, db: true });
   } catch (error) {
     console.error("Save Form DB Error:", error);
-    // Fallback success for demo/mocking
-    console.log(`[MOCK] Mock-saving ${type}:`, data);
-    res.json({ success: true, db: false, message: "Saved to local logs (DB connection unavailable)" });
-  }
-});
-
-app.post("/api/chat", async (req, res) => {
-  const { messages, systemInstruction } = req.body;
-  
-  // Try GitHub Models (Copilot) first - FREE with high limits
-  const githubToken = process.env.GITHUB_TOKEN;
-  
-  if (githubToken) {
-    try {
-      const formattedMessages = messages.map((m: any) => ({
-        role: m.role,
-        content: m.parts?.[0]?.text || m.content || ""
-      }));
-      
-      const response = await fetch('https://models.github.ai/inference', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${githubToken}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemInstruction },
-            ...formattedMessages
-          ],
-          temperature: 0.7,
-          max_tokens: 2048
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.choices?.[0]?.message?.content) {
-          return res.json({ text: data.choices[0].message.content });
-        }
-      }
-    } catch (err) {
-      console.log("GitHub Models failed, trying Gemini...", err.message);
-    }
-  }
-  
-  // Fallback to Gemini
-  try {
-    const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "Missing API Key on server" });
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
-    let response;
-    let lastError;
-    const fallbackModels = ["gemini-1.5-flash", "gemini-2.0-flash"];
-
-    for (const modelName of fallbackModels) {
-      try {
-        response = await ai.models.generateContent({
-          model: modelName,
-          contents: messages,
-          config: { systemInstruction }
-        });
-        break;
-      } catch (err: any) {
-        lastError = err;
-        const errorMsg = err?.message || "";
-        const isNotFound = errorMsg.includes("not found") || errorMsg.includes("404");
-        const isQuota = errorMsg.toLowerCase().includes("quota") || errorMsg.includes("429");
-        if (!isNotFound && !isQuota) {
-          break; 
-        }
-      }
-    }
-
-    if (!response) throw lastError;
-    res.json({ text: response.text });
-  } catch (error: any) {
-    console.error("AI Chat API Error:", error);
-    res.status(500).json({ error: error?.message || "Internal Server Error" });
+    res.status(500).json({ success: false, db: false, message: "Database connection unavailable" });
   }
 });
 
